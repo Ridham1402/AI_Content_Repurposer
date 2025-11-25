@@ -10,7 +10,7 @@ class TwitterAgent:
     def __init__(self):
         self.llm = ChatGroq(
             temperature=0.7,  # Higher for more creative social content
-            model_name="llama-3.3-70b-versatile",
+            model_name="llama-3.1-8b-instant",
             groq_api_key=os.getenv("GROQ_API_KEY")
         )
         
@@ -65,7 +65,7 @@ class LinkedInAgent:
     def __init__(self):
         self.llm = ChatGroq(
             temperature=0.6,
-            model_name="llama-3.3-70b-versatile",
+            model_name="llama-3.1-8b-instant",
             groq_api_key=os.getenv("GROQ_API_KEY")
         )
         
@@ -120,7 +120,7 @@ class InstagramAgent:
     def __init__(self):
         self.llm = ChatGroq(
             temperature=0.7,
-            model_name="llama-3.3-70b-versatile",
+            model_name="llama-3.1-8b-instant",
             groq_api_key=os.getenv("GROQ_API_KEY")
         )
         

@@ -15,7 +15,7 @@ class EnhancedTwitterAgent:
         self.llm = get_llm(temperature=0.7, use_local=False)
         
         self.prompt = PromptTemplate(
-            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone"],
+            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone", "feedback"],
             template="""
             You are an expert Twitter content creator. Create an engaging Twitter thread based on research and strategy.
             
@@ -28,6 +28,10 @@ class EnhancedTwitterAgent:
             
             CONTENT STRATEGY:
             {strategy}
+
+            FEEDBACK FROM EVALUATOR (if revising; otherwise ignore):
+            {feedback}
+
             
             Create a Twitter thread (10-12 tweets) that:
             - Starts with the hook from the strategy (make it attention-grabbing!)
@@ -49,7 +53,7 @@ class EnhancedTwitterAgent:
         self.chain = self.prompt | self.llm | StrOutputParser()
     
     def generate(self, research_report: str, strategy: str, brand_info: str, 
-                 topic: str, brand_tone: str) -> dict:
+                 topic: str, brand_tone: str, feedback: str) -> dict:
         try:
             print("\n🐦 Generating Twitter thread...")
             thread = self.chain.invoke({
@@ -57,7 +61,8 @@ class EnhancedTwitterAgent:
                 "strategy": strategy,
                 "brand_info": brand_info,
                 "topic": topic,
-                "brand_tone": brand_tone
+                "brand_tone": brand_tone,
+                "feedback": feedback
             })
             
             return {
@@ -78,10 +83,10 @@ class EnhancedLinkedInAgent:
     """
     
     def __init__(self):
-        self.llm = get_llm(temperature=0.6, use_local=False)
+        self.llm = get_llm(temperature=0.7, use_local=True)
         
         self.prompt = PromptTemplate(
-            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone"],
+            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone", "feedback"],
             template="""
             You are a LinkedIn content strategist. Create a professional thought leadership post.
             
@@ -94,6 +99,10 @@ class EnhancedLinkedInAgent:
             
             CONTENT STRATEGY:
             {strategy}
+
+            FEEDBACK FROM EVALUATOR (if revising; otherwise ignore):
+            {feedback}
+
             
             Create a LinkedIn post that:
             - Opens with the hook from strategy (first 2 lines are crucial!)
@@ -115,7 +124,7 @@ class EnhancedLinkedInAgent:
         self.chain = self.prompt | self.llm | StrOutputParser()
     
     def generate(self, research_report: str, strategy: str, brand_info: str,
-                 topic: str, brand_tone: str) -> dict:
+                 topic: str, brand_tone: str, feedback: str) -> dict:
         try:
             print("\n💼 Generating LinkedIn post...")
             post = self.chain.invoke({
@@ -123,7 +132,8 @@ class EnhancedLinkedInAgent:
                 "strategy": strategy,
                 "brand_info": brand_info,
                 "topic": topic,
-                "brand_tone": brand_tone
+                "brand_tone": brand_tone,
+                "feedback": feedback
             })
             
             return {
@@ -147,7 +157,7 @@ class EnhancedInstagramAgent:
         self.llm = get_llm(temperature=0.7, use_local=False)
         
         self.prompt = PromptTemplate(
-            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone"],
+            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone", "feedback"],
             template="""
             You are an Instagram content creator. Create an engaging caption based on research.
             
@@ -160,6 +170,10 @@ class EnhancedInstagramAgent:
             
             CONTENT STRATEGY:
             {strategy}
+
+            FEEDBACK FROM EVALUATOR (if revising; otherwise ignore):
+            {feedback}
+
             
             Create an Instagram caption that:
             - Starts with the hook from strategy (shows in feed preview!)
@@ -181,7 +195,7 @@ class EnhancedInstagramAgent:
         self.chain = self.prompt | self.llm | StrOutputParser()
     
     def generate(self, research_report: str, strategy: str, brand_info: str,
-                 topic: str, brand_tone: str) -> dict:
+                 topic: str, brand_tone: str, feedback: str) -> dict:
         try:
             print("\n📸 Generating Instagram caption...")
             caption = self.chain.invoke({
@@ -189,7 +203,8 @@ class EnhancedInstagramAgent:
                 "strategy": strategy,
                 "brand_info": brand_info,
                 "topic": topic,
-                "brand_tone": brand_tone
+                "brand_tone": brand_tone,
+                "feedback": feedback
             })
             
             return {
@@ -210,10 +225,10 @@ class NewsletterAgent:
     """
     
     def __init__(self):
-        self.llm = get_llm(temperature=0.6, use_local=False)
+        self.llm = get_llm(temperature=0.5, use_local=False)
         
         self.prompt = PromptTemplate(
-            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone"],
+            input_variables=["research_report", "strategy", "brand_info", "topic", "brand_tone", "feedback"],
             template="""
             You are an email marketing expert. Create a compelling newsletter based on research.
             
@@ -226,7 +241,11 @@ class NewsletterAgent:
             
             CONTENT STRATEGY:
             {strategy}
+
+            FEEDBACK FROM EVALUATOR (if revising; otherwise ignore):
+            {feedback}
             
+
             Create an email newsletter with:
             
             **SUBJECT LINE:** 
@@ -254,7 +273,7 @@ class NewsletterAgent:
         self.chain = self.prompt | self.llm | StrOutputParser()
     
     def generate(self, research_report: str, strategy: str, brand_info: str,
-                 topic: str, brand_tone: str) -> dict:
+                 topic: str, brand_tone: str, feedback: str = "") -> dict:
         try:
             print("\n📧 Generating email newsletter...")
             newsletter = self.chain.invoke({
@@ -262,7 +281,8 @@ class NewsletterAgent:
                 "strategy": strategy,
                 "brand_info": brand_info,
                 "topic": topic,
-                "brand_tone": brand_tone
+                "brand_tone": brand_tone,
+                "feedback": feedback
             })
             
             return {

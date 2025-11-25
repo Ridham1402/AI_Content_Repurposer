@@ -1,69 +1,53 @@
-from src.content_analyzer import analyze_content
-from src.platform_agents import TwitterAgent, LinkedInAgent, InstagramAgent
+from src.orchestrator import ContentCreationOrchestrator
 
-# Test with sample content
-sample_content = """
-The future of AI in content creation is transforming how we work. 
-Content creators spend 80% of their time repurposing content across platforms. 
-This is inefficient and drains creativity. AI agents can automate this process, 
-analyzing your long-form content and intelligently adapting it for Twitter, 
-LinkedIn, Instagram, and more. The key is maintaining your unique voice while 
-optimizing for each platform's best practices. This isn't about replacing 
-creators—it's about giving them superpowers to focus on what matters: 
-creating great original content. The tools exist today. The question is: 
-are you ready to 10x your content output?
-"""
+# User inputs - GrowthOS AI Visibility Startup
+brand_info = "Centre for Development of Telematics (Working on developing mission critical communication)"
+industry = "Mission critical communication technology"
+target_audience = "Organisations interest in adopting mission critical communication solutions"
+topic = "MCX - Mission Critical Communication for Next-Gen Connectivity"
+brand_tone = "Professional, Innovative, Trustworthy"
 
-print("=" * 80)
-print("🚀 AI CONTENT REPURPOSER - DEMO")
-print("=" * 80)
+# Create orchestrator and run
+orchestrator = ContentCreationOrchestrator()
+result = orchestrator.run(
+    brand_info=brand_info,
+    industry=industry,
+    target_audience=target_audience,
+    topic=topic,
+    brand_tone=brand_tone
+)
 
-# Step 1: Analyze content
-print("\n🔍 Step 1: Analyzing content...\n")
-analysis_result = analyze_content(sample_content)
+# Display final results
+print("\n" + "="*80)
+print(f"📱 FINAL APPROVED CONTENT - {brand_info}")
+print("="*80)
 
-if not analysis_result["success"]:
-    print(f"❌ Analysis failed: {analysis_result['error']}")
-    exit()
+print("\n🐦 TWITTER THREAD:")
+print("-"*80)
+print(result["twitter_content"])
+print(f"\nQuality Score: {result['twitter_quality']['overall_score']:.1f}/10")
 
-analysis = analysis_result["analysis"]
-print("✅ Analysis complete!\n")
+print("\n\n💼 LINKEDIN POST:")
+print("-"*80)
+print(result["linkedin_content"])
+print(f"\nQuality Score: {result['linkedin_quality']['overall_score']:.1f}/10")
 
-# Step 2: Generate platform-specific content
-print("=" * 80)
-print("📱 Step 2: Generating platform-specific content...")
-print("=" * 80)
+print("\n\n📸 INSTAGRAM CAPTION:")
+print("-"*80)
+print(result["instagram_content"])
+print(f"\nQuality Score: {result['instagram_quality']['overall_score']:.1f}/10")
 
-# Twitter Thread
-print("\n🐦 TWITTER THREAD:\n")
-print("-" * 80)
-twitter_agent = TwitterAgent()
-twitter_result = twitter_agent.generate(analysis, sample_content)
-if twitter_result["success"]:
-    print(twitter_result["content"])
-else:
-    print(f"❌ Error: {twitter_result['error']}")
+print("\n\n📧 EMAIL NEWSLETTER:")
+print("-"*80)
+print(result["newsletter_content"])
+print(f"\nQuality Score: {result['newsletter_quality']['overall_score']:.1f}/10")
 
-# LinkedIn Post
-print("\n\n💼 LINKEDIN POST:\n")
-print("-" * 80)
-linkedin_agent = LinkedInAgent()
-linkedin_result = linkedin_agent.generate(analysis, sample_content)
-if linkedin_result["success"]:
-    print(linkedin_result["content"])
-else:
-    print(f"❌ Error: {linkedin_result['error']}")
-
-# Instagram Caption
-print("\n\n📸 INSTAGRAM CAPTION:\n")
-print("-" * 80)
-instagram_agent = InstagramAgent()
-instagram_result = instagram_agent.generate(analysis, sample_content)
-if instagram_result["success"]:
-    print(instagram_result["content"])
-else:
-    print(f"❌ Error: {instagram_result['error']}")
-
-print("\n" + "=" * 80)
-print("✨ Content repurposing complete!")
-print("=" * 80)
+print("\n" + "="*80)
+print("✅ GROWTHOS CONTENT CREATION COMPLETE")
+print("="*80)
+print(f"\n📊 Campaign Summary:")
+print(f"  • Brand: {brand_info}")
+print(f"  • Focus: {topic}")
+print(f"  • Research sources: {result['research_sources']}")
+print(f"  • All content optimized for market penetration messaging")
+print("="*80)

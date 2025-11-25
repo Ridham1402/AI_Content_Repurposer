@@ -43,6 +43,11 @@ class ContentCreationState(TypedDict):
     # Overall status
     all_approved: bool
     retry_count: int
+
+    twitter_attempts: list
+    linkedin_attempts: list
+    instagram_attempts: list
+    newsletter_attempts: list
     
 
 class ContentCreationOrchestrator:
@@ -146,7 +151,8 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_info=state["brand_info"],
             topic=state["topic"],
-            brand_tone=state["brand_tone"]
+            brand_tone=state["brand_tone"],
+            feedback=""
         )
         state["twitter_content"] = twitter_result["content"]
         
@@ -155,7 +161,8 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_info=state["brand_info"],
             topic=state["topic"],
-            brand_tone=state["brand_tone"]
+            brand_tone=state["brand_tone"],
+            feedback=""
         )
         state["linkedin_content"] = linkedin_result["content"]
         
@@ -164,7 +171,8 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_info=state["brand_info"],
             topic=state["topic"],
-            brand_tone=state["brand_tone"]
+            brand_tone=state["brand_tone"],
+            feedback=""
         )
         state["instagram_content"] = instagram_result["content"]
         
@@ -173,7 +181,8 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_info=state["brand_info"],
             topic=state["topic"],
-            brand_tone=state["brand_tone"]
+            brand_tone=state["brand_tone"],
+            feedback=""
         )
         state["newsletter_content"] = newsletter_result["content"]
         
@@ -193,6 +202,10 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_tone=state["brand_tone"]
         )
+        state["twitter_attempts"].append({
+            "content": state["twitter_content"],
+            "score": state["twitter_quality"]["overall_score"]
+        })
         print(f"  Twitter: {state['twitter_quality']['overall_score']:.1f}/10 - {state['twitter_quality']['recommendation']}")
         
         state["linkedin_quality"] = self.quality_agent.evaluate(
@@ -201,6 +214,10 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_tone=state["brand_tone"]
         )
+        state["linkedin_attempts"].append({
+            "content": state["linkedin_content"],
+            "score": state["linkedin_quality"]["overall_score"]
+        })
         print(f"  LinkedIn: {state['linkedin_quality']['overall_score']:.1f}/10 - {state['linkedin_quality']['recommendation']}")
         
         state["instagram_quality"] = self.quality_agent.evaluate(
@@ -209,6 +226,10 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_tone=state["brand_tone"]
         )
+        state["instagram_attempts"].append({
+            "content": state["instagram_content"],
+            "score": state["instagram_quality"]["overall_score"]
+        })
         print(f"  Instagram: {state['instagram_quality']['overall_score']:.1f}/10 - {state['instagram_quality']['recommendation']}")
         
         state["newsletter_quality"] = self.quality_agent.evaluate(
@@ -217,6 +238,10 @@ class ContentCreationOrchestrator:
             strategy=state["strategy"],
             brand_tone=state["brand_tone"]
         )
+        state["newsletter_attempts"].append({
+            "content": state["newsletter_content"],
+            "score": state["newsletter_quality"]["overall_score"]
+        })
         print(f"  Newsletter: {state['newsletter_quality']['overall_score']:.1f}/10 - {state['newsletter_quality']['recommendation']}")
         
         # Check if all approved
@@ -257,51 +282,58 @@ class ContentCreationOrchestrator:
         # Only regenerate platforms that failed
         if not state["twitter_quality"].get("approved", False):
             print("  🐦 Regenerating Twitter...")
+            feedback = state["twitter_quality"].get("feedback", "")
             twitter_result = self.twitter_agent.generate(
                 research_report=state["research_report"],
                 strategy=state["strategy"],
                 brand_info=state["brand_info"],
                 topic=state["topic"],
-                brand_tone=state["brand_tone"]
+                brand_tone=state["brand_tone"],
+                feedback=feedback
             )
             state["twitter_content"] = twitter_result["content"]
         
         if not state["linkedin_quality"].get("approved", False):
             print("  💼 Regenerating LinkedIn...")
+            feedback = state["linkedin_quality"].get("feedback", "")
             linkedin_result = self.linkedin_agent.generate(
                 research_report=state["research_report"],
                 strategy=state["strategy"],
                 brand_info=state["brand_info"],
                 topic=state["topic"],
-                brand_tone=state["brand_tone"]
+                brand_tone=state["brand_tone"],
+                feedback=feedback
             )
             state["linkedin_content"] = linkedin_result["content"]
         
         if not state["instagram_quality"].get("approved", False):
             print("  📸 Regenerating Instagram...")
+            feedback = state["instagram_quality"].get("feedback", "")
             instagram_result = self.instagram_agent.generate(
                 research_report=state["research_report"],
                 strategy=state["strategy"],
                 brand_info=state["brand_info"],
                 topic=state["topic"],
-                brand_tone=state["brand_tone"]
+                brand_tone=state["brand_tone"],
+                feedback=feedback
             )
             state["instagram_content"] = instagram_result["content"]
         
         if not state["newsletter_quality"].get("approved", False):
             print("  📧 Regenerating Newsletter...")
+            feedback = state["newsletter_quality"].get("feedback", "")
             newsletter_result = self.newsletter_agent.generate(
                 research_report=state["research_report"],
                 strategy=state["strategy"],
                 brand_info=state["brand_info"],
                 topic=state["topic"],
-                brand_tone=state["brand_tone"]
+                brand_tone=state["brand_tone"],
+                feedback=feedback
             )
             state["newsletter_content"] = newsletter_result["content"]
         
         print("✅ Failed content regenerated")
         return state
-
 
     def _should_retry(self, state: ContentCreationState) -> str:
         """Decide if content should be regenerated"""
@@ -345,7 +377,9 @@ class ContentCreationOrchestrator:
             instagram_quality={},
             newsletter_quality={},
             all_approved=False,
-            retry_count=0
+            retry_count=0,
+            twitter_attempts=[], linkedin_attempts=[],
+            instagram_attempts=[], newsletter_attempts=[],
         )
         
         # Run the workflow
@@ -355,4 +389,16 @@ class ContentCreationOrchestrator:
         print("🎉 WORKFLOW COMPLETED")
         print("="*80)
         
+        def choose_best(attempts):
+            if not attempts:
+                return ""
+            # Each attempt is {"content": ..., "score": ...}
+            best = max(attempts, key=lambda x: x["score"])
+            return best["content"]
+
+        final_state["twitter_content"] = choose_best(final_state["twitter_attempts"])
+        final_state["linkedin_content"] = choose_best(final_state["linkedin_attempts"])
+        final_state["instagram_content"] = choose_best(final_state["instagram_attempts"])
+        final_state["newsletter_content"] = choose_best(final_state["newsletter_attempts"])
+
         return final_state
